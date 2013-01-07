@@ -77,6 +77,24 @@ Notes about conflicts
   - Our default recipe templates out the /etc/nginx/conf.d/default.conf.  This will directly
     conflict with another cookbook, such as nginx, trying to manage this file.
 
+Chef Solo Note
+==============
+
+These node attributes are stored on the Chef
+server when using `chef-client`. Because `chef-solo` does not
+connect to a server or save the node object at all, to have the same
+passwords persist across `chef-solo` runs, you must specify them in
+the `json_attribs` file used. For example:
+
+    {
+      "gitlab": {
+        "database": {
+          "password": "iloverandompasswordsbutthiswilldo"
+        }
+      },
+      "run_list":["recipe[gitlab::default]"]
+    }
+
 Attributes
 ==========
 

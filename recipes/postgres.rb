@@ -18,11 +18,21 @@
 #
 include_recipe 'postgresql::ruby'
 
-# Enable secure password generation
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-node.set_unless['gitlab']['database']['password'] = secure_password
+if Chef::Config[:solo]
+  # Ensure database password attribute is defined
+  if node['gitlab']['database']['password'].nil?
+    Chef::Application.fatal!([
+      "You must set node['gitlab']['database']['password'] in chef-solo mode.",
+      "For more information, see https://github.com/atomic-penguin/cookbook-gitlab#chef-solo-note"
+    ].join(' '))
+  end
+else
+  # Enable secure password generation
+  ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+  node.set_unless['gitlab']['database']['password'] = secure_password
+end
 
-# Save database password to node, unless it is already set.
+# Save database password to node, unless using chef-solo
 ruby_block "save node data" do
   block do
     node.save
